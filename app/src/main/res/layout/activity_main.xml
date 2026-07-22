@@ -175,7 +175,7 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:max="96"
-                    android:progress="40" />
+                    android:progress="56" />
 
                 <TextView
                     android:id="@+id/tv_min_db"
@@ -206,7 +206,7 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:max="96"
-                    android:progress="10" />
+                    android:progress="86" />
 
                 <TextView
                     android:id="@+id/tv_max_db"
@@ -269,7 +269,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="Steady 440 Hz \u2014 use the scale slider above or the notification to hear volume changes."
+                    android:text="Steady 440 Hz - use the scale slider above or the notification to hear volume changes."
                     android:textSize="12sp"
                     android:alpha="0.6" />
 
@@ -294,7 +294,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="3s sweep quiet-to-loud, loops. Without EQ the volume swings wildly; with EQ it stays in range."
+                    android:text="3s sweep quiet to loud, loops. Without EQ the volume swings wildly. With EQ it stays tight."
                     android:textSize="12sp"
                     android:alpha="0.6" />
 
