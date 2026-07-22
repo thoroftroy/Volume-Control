@@ -43,29 +43,32 @@ class EqualizerEngine {
     private fun applySettings() {
         val dp = dynamics ?: return
         try {
-            val avgDb = (minDb + maxDb) / 2f
             val rangeWidth = (maxDb - minDb).toFloat()
 
-            val inputGain = ((-avgDb) * 0.6f).coerceIn(5f, 30f)
+            // heavy input boost — quieter settings (lower minDb) = more gain
+            val inputGain = (-minDb * 0.9f).coerceIn(6f, 50f)
 
-            val compressorThreshold = maxDb.toFloat()
-            val compressorRatio = 3f
-            val compressorKnee = (rangeWidth * 0.35f).coerceIn(4f, 16f)
+            // compressor clamps peaks at maxDb level
+            val compThreshold = maxDb.toFloat()
+            val compRatio = 6f
+            val compKnee = (rangeWidth * 0.25f).coerceIn(4f, 14f)
 
+            // volume scale applied via final limiter post-gain
             val scaleGainDb = (20.0 * log10(scaleFactor.toDouble().coerceAtLeast(0.001))).toFloat()
 
             val mbcBand = DynamicsProcessing.MbcBand(
                 true, 1000f,
-                5f, 80f,
-                compressorRatio, compressorThreshold, compressorKnee,
-                -90f, 1f, 0f, 0f
+                3f, 60f,
+                compRatio, compThreshold, compKnee,
+                -90f, 1f,
+                3f, 0f
             )
 
             val mbc = DynamicsProcessing.Mbc(true, true, 1)
             mbc.setBand(0, mbcBand)
 
             val limiter = DynamicsProcessing.Limiter(
-                true, true, 0, 1f, 50f, 20f, -1f, scaleGainDb
+                true, true, 0, 1f, 40f, 30f, -0.5f, scaleGainDb
             )
 
             dp.setInputGainAllChannelsTo(inputGain)

@@ -4,11 +4,11 @@ import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
-import android.graphics.Path
 import android.util.AttributeSet
 import android.view.View
 import kotlin.math.abs
 import kotlin.math.log10
+import kotlin.math.sqrt
 
 class VisualizerView @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyle: Int = 0
@@ -17,27 +17,26 @@ class VisualizerView @JvmOverloads constructor(
     companion object {
         private const val DB_FLOOR = -96f
         private const val DB_CEILING = 0f
-        private const val WAVEFORM_SIZE = 256
+        private const val BAR_COUNT = 48
+        private const val HISTORY = 3
     }
 
     private var minDb = -40f
     private var maxDb = -10f
-    private val waveform = FloatArray(WAVEFORM_SIZE)
+    private val barLevels = FloatArray(BAR_COUNT * HISTORY)
+    private var writeIdx = 0
 
-    private val bgPaint = Paint().apply { color = 0xFF1A1A1A.toInt() }
-    private val redPaint = Paint().apply { color = 0x44FF4444.toInt() }
-    private val greenPaint = Paint().apply { color = 0x4444FF44.toInt() }
-    private val wavePaint = Paint().apply {
-        color = Color.WHITE; strokeWidth = 2.5f; style = Paint.Style.STROKE; isAntiAlias = true
-    }
-    private val waveRedPaint = Paint().apply {
-        color = 0xFFFF4444.toInt(); strokeWidth = 2.5f; style = Paint.Style.STROKE; isAntiAlias = true
-    }
+    private val bgPaint = Paint().apply { color = 0xFF141414.toInt() }
+    private val redZone = Paint().apply { color = 0x22FF3333.toInt() }
+    private val greenZone = Paint().apply { color = 0x2233FF33.toInt() }
+    private val barGreen = Paint().apply { color = 0xFF33CC33.toInt(); style = Paint.Style.FILL }
+    private val barRed = Paint().apply { color = 0xFFFF4444.toInt(); style = Paint.Style.FILL }
+    private val barInactive = Paint().apply { color = 0x22444444.toInt(); style = Paint.Style.FILL }
     private val labelPaint = Paint().apply {
-        color = 0xAAFFFFFF.toInt(); textSize = 26f; isAntiAlias = true
+        color = 0x88FFFFFF.toInt(); textSize = 22f; isAntiAlias = true
     }
     private val markerPaint = Paint().apply {
-        color = 0x66FFFFFF.toInt(); strokeWidth = 1f
+        color = 0x33FFFFFF.toInt(); strokeWidth = 1f
     }
 
     fun setRange(minDb: Float, maxDb: Float) {
@@ -47,16 +46,19 @@ class VisualizerView @JvmOverloads constructor(
     }
 
     fun pushWaveform(data: ByteArray) {
-        if (waveform.isEmpty()) return
-        val len = minOf(data.size / 2, WAVEFORM_SIZE)
-        val srcStep = (data.size / 2) / len
+        val len = minOf(data.size / 2, BAR_COUNT)
+        val srcStep = maxOf((data.size / 2) / len, 1)
+        val base = writeIdx * BAR_COUNT
+
         for (i in 0 until len) {
             val idx = i * srcStep * 2
             if (idx + 1 < data.size) {
                 val sample = ((data[idx].toInt() and 0xFF) or (data[idx + 1].toInt() shl 8)).toShort()
-                waveform[i] = waveform[i] * 0.7f + abs(sample.toFloat() / 32768f) * 0.3f
+                val level = abs(sample.toFloat()) / 32768f
+                barLevels[base + i] = level
             }
         }
+        writeIdx = (writeIdx + 1) % HISTORY
         invalidate()
     }
 
@@ -64,10 +66,10 @@ class VisualizerView @JvmOverloads constructor(
         super.onDraw(canvas)
         val w = width.toFloat()
         val h = height.toFloat()
-        val padLeft = 80f
-        val padRight = 16f
-        val padTop = 12f
-        val padBottom = 12f
+        val padLeft = 12f
+        val padRight = 12f
+        val padTop = 28f
+        val padBottom = 4f
         val chartW = w - padLeft - padRight
         val chartH = h - padTop - padBottom
 
@@ -81,51 +83,45 @@ class VisualizerView @JvmOverloads constructor(
         val yMax = dbToY(maxDb)
         val chartRight = padLeft + chartW
 
-        canvas.drawRect(padLeft, padTop, chartRight, yMin, redPaint)
-        canvas.drawRect(padLeft, yMax, chartRight, padTop + chartH, redPaint)
-        canvas.drawRect(padLeft, yMin, chartRight, yMax, greenPaint)
+        canvas.drawRect(padLeft, padTop, chartRight, yMin, redZone)
+        canvas.drawRect(padLeft, yMax, chartRight, padTop + chartH, redZone)
+        canvas.drawRect(padLeft, yMin, chartRight, yMax, greenZone)
 
-        val avgDb = (minDb + maxDb) / 2f
-        listOf(minDb, avgDb, maxDb).forEach { db ->
+        listOf(minDb, maxDb, (minDb + maxDb) / 2f).forEach { db ->
             val y = dbToY(db)
             canvas.drawLine(padLeft, y, chartRight, y, markerPaint)
-            val label = "${db.toInt()} dB"
-            canvas.drawText(label, 4f, y + 8f, labelPaint)
+            canvas.drawText("${db.toInt()}", 2f, y + 18f, labelPaint)
         }
 
-        // live waveform
-        var activeCount = 0
-        for (v in waveform) if (v > 0.001f) activeCount++
-        if (activeCount > 2) {
-            val xStep = chartW / WAVEFORM_SIZE
-            val pathGreen = Path()
-            val pathRed = Path()
-            var greenStarted = false
-            var redStarted = false
+        val barW = chartW / BAR_COUNT - 2f
+        if (barW < 1f) return
 
-            for (i in waveform.indices) {
-                val levelDb = if (waveform[i] > 0.0001f) {
-                    20f * log10(waveform[i].coerceAtLeast(0.0001f).toDouble()).toFloat()
-                } else {
-                    DB_FLOOR
-                }
-                val x = padLeft + i * xStep
-                val y = dbToY(levelDb)
-                val inRange = levelDb in minDb..maxDb
+        var active = false
+        for (i in 0 until BAR_COUNT) {
+            var maxLevel = 0f
+            for (hst in 0 until HISTORY) {
+                val v = barLevels[hst * BAR_COUNT + i]
+                if (v > maxLevel) maxLevel = v
+            }
+            if (maxLevel > 0.002f) active = true
 
-                if (inRange) {
-                    if (redStarted) { pathRed.lineTo(x, y); redStarted = false }
-                    if (!greenStarted) { pathGreen.moveTo(x, y); greenStarted = true }
-                    else pathGreen.lineTo(x, y)
-                } else {
-                    if (greenStarted) { pathGreen.lineTo(x, y); greenStarted = false }
-                    if (!redStarted) { pathRed.moveTo(x, y); redStarted = true }
-                    else pathRed.lineTo(x, y)
-                }
+            val levelDb = if (maxLevel > 0.0001f) {
+                (20.0 * log10(maxLevel.coerceAtLeast(0.0001f).toDouble())).toFloat()
+            } else {
+                DB_FLOOR
             }
 
-            canvas.drawPath(pathGreen, wavePaint)
-            canvas.drawPath(pathRed, waveRedPaint)
+            val barH = maxOf(chartH * (maxLevel * 0.95f), 2f)
+            val x = padLeft + i * (chartW / BAR_COUNT)
+            val yTop = padTop + chartH - barH
+
+            val inRange = levelDb in minDb..maxDb
+            val paint = when {
+                !active -> barInactive
+                inRange -> barGreen
+                else -> barRed
+            }
+            canvas.drawRect(x, yTop, x + barW, padTop + chartH, paint)
         }
     }
 }

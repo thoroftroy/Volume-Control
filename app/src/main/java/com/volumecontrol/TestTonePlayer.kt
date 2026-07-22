@@ -12,7 +12,7 @@ class TestTonePlayer {
     companion object {
         const val SAMPLE_RATE = 44100
         const val FREQUENCY = 440.0
-        const val SWEEP_DURATION_S = 10
+        const val SWEEP_DURATION_S = 3
         const val CONSTANT_AMPLITUDE = 0.2f
         val ACTIVE_TINT = ColorStateList.valueOf(0xFF44CC44.toInt())
     }
