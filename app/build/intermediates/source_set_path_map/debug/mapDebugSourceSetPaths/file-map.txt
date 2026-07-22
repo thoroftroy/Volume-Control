@@ -1,0 +1,36 @@
+com.volumecontrol.app-lifecycle-service-2.8.4-0 /home/microwavedthebaby/.gradle/caches/transforms-4/1a4d6ec451884fe7af6f3cc04f96996d/transformed/lifecycle-service-2.8.4/res
+com.volumecontrol.app-material-1.12.0-1 /home/microwavedthebaby/.gradle/caches/transforms-4/21fce60b42614f4a57bc9354a6498570/transformed/material-1.12.0/res
+com.volumecontrol.app-emoji2-1.3.0-2 /home/microwavedthebaby/.gradle/caches/transforms-4/22f84dc0e4d12cc1f2e2dfcc107c2289/transformed/emoji2-1.3.0/res
+com.volumecontrol.app-core-1.13.1-3 /home/microwavedthebaby/.gradle/caches/transforms-4/24e4e526f469cf087615bd6353e6949e/transformed/core-1.13.1/res
+com.volumecontrol.app-appcompat-resources-1.7.0-4 /home/microwavedthebaby/.gradle/caches/transforms-4/346e5ac766d7ee2202f66f73995b7958/transformed/appcompat-resources-1.7.0/res
+com.volumecontrol.app-lifecycle-process-2.8.4-5 /home/microwavedthebaby/.gradle/caches/transforms-4/356adf952dc403e452386b2c8851b842/transformed/lifecycle-process-2.8.4/res
+com.volumecontrol.app-lifecycle-viewmodel-savedstate-2.8.4-6 /home/microwavedthebaby/.gradle/caches/transforms-4/3f5492ea757c054c7d6fdd7a622b9923/transformed/lifecycle-viewmodel-savedstate-2.8.4/res
+com.volumecontrol.app-fragment-1.5.4-7 /home/microwavedthebaby/.gradle/caches/transforms-4/44a37a154e58fa2f8e8e584bc2e6bab6/transformed/fragment-1.5.4/res
+com.volumecontrol.app-recyclerview-1.1.0-8 /home/microwavedthebaby/.gradle/caches/transforms-4/4c3f8846ccc23a600afd67551b7ec84d/transformed/recyclerview-1.1.0/res
+com.volumecontrol.app-annotation-experimental-1.4.0-9 /home/microwavedthebaby/.gradle/caches/transforms-4/547697d108c7ea0d4e00722b2405248a/transformed/annotation-experimental-1.4.0/res
+com.volumecontrol.app-lifecycle-runtime-release-10 /home/microwavedthebaby/.gradle/caches/transforms-4/5d3e80b971c628e281660111691ed1a1/transformed/lifecycle-runtime-release/res
+com.volumecontrol.app-drawerlayout-1.1.1-11 /home/microwavedthebaby/.gradle/caches/transforms-4/61116d53b36ab90d570cabaf0683e31d/transformed/drawerlayout-1.1.1/res
+com.volumecontrol.app-savedstate-1.2.1-12 /home/microwavedthebaby/.gradle/caches/transforms-4/76c82afae8798a2c7d7d375a2ae2465e/transformed/savedstate-1.2.1/res
+com.volumecontrol.app-coordinatorlayout-1.1.0-13 /home/microwavedthebaby/.gradle/caches/transforms-4/7c364e62a3aa73c1a0588067c97718b4/transformed/coordinatorlayout-1.1.0/res
+com.volumecontrol.app-viewpager2-1.0.0-14 /home/microwavedthebaby/.gradle/caches/transforms-4/868c34c9af7dbce6c8501c71a81f57f3/transformed/viewpager2-1.0.0/res
+com.volumecontrol.app-appcompat-1.7.0-15 /home/microwavedthebaby/.gradle/caches/transforms-4/877026171584653077760addb0225b33/transformed/appcompat-1.7.0/res
+com.volumecontrol.app-lifecycle-viewmodel-release-16 /home/microwavedthebaby/.gradle/caches/transforms-4/90c3bf76735c71924f2f127c2b004fa3/transformed/lifecycle-viewmodel-release/res
+com.volumecontrol.app-lifecycle-livedata-core-ktx-2.8.4-17 /home/microwavedthebaby/.gradle/caches/transforms-4/994c3804b3575ae0925c2dffb6dd9703/transformed/lifecycle-livedata-core-ktx-2.8.4/res
+com.volumecontrol.app-lifecycle-livedata-core-2.8.4-18 /home/microwavedthebaby/.gradle/caches/transforms-4/9f82adc378f4e86def4d3acaf84cb070/transformed/lifecycle-livedata-core-2.8.4/res
+com.volumecontrol.app-transition-1.5.0-19 /home/microwavedthebaby/.gradle/caches/transforms-4/b04323a5710808f4c750414b97893d5e/transformed/transition-1.5.0/res
+com.volumecontrol.app-emoji2-views-helper-1.3.0-20 /home/microwavedthebaby/.gradle/caches/transforms-4/b5e0ad9b2c4b6c8a87cb786126bfe4d7/transformed/emoji2-views-helper-1.3.0/res
+com.volumecontrol.app-profileinstaller-1.3.1-21 /home/microwavedthebaby/.gradle/caches/transforms-4/c643c47b18ab6c9d28889fb5fc01f141/transformed/profileinstaller-1.3.1/res
+com.volumecontrol.app-core-runtime-2.2.0-22 /home/microwavedthebaby/.gradle/caches/transforms-4/d59da471a6c1834745fb01db7ba9a0ca/transformed/core-runtime-2.2.0/res
+com.volumecontrol.app-startup-runtime-1.1.1-23 /home/microwavedthebaby/.gradle/caches/transforms-4/d87370cdfa411d109878ae8165f7a890/transformed/startup-runtime-1.1.1/res
+com.volumecontrol.app-constraintlayout-2.0.1-24 /home/microwavedthebaby/.gradle/caches/transforms-4/dbc13172bf298f308e1ed7e2535a1f18/transformed/constraintlayout-2.0.1/res
+com.volumecontrol.app-lifecycle-livedata-2.8.4-25 /home/microwavedthebaby/.gradle/caches/transforms-4/dea42d3acf06167ba6d27b776df7175e/transformed/lifecycle-livedata-2.8.4/res
+com.volumecontrol.app-cardview-1.0.0-26 /home/microwavedthebaby/.gradle/caches/transforms-4/ebf9da66dd301b538bec79cb83ccb533/transformed/cardview-1.0.0/res
+com.volumecontrol.app-activity-1.8.0-27 /home/microwavedthebaby/.gradle/caches/transforms-4/f140098cc1e78d1f2b7fdfccad6a011c/transformed/activity-1.8.0/res
+com.volumecontrol.app-core-ktx-1.13.1-28 /home/microwavedthebaby/.gradle/caches/transforms-4/f2b2b66add166423e8b510305c963837/transformed/core-ktx-1.13.1/res
+com.volumecontrol.app-pngs-29 /home/microwavedthebaby/Applications/Volume Control/Volume-Control/app/build/generated/res/pngs/debug
+com.volumecontrol.app-resValues-30 /home/microwavedthebaby/Applications/Volume Control/Volume-Control/app/build/generated/res/resValues/debug
+com.volumecontrol.app-packageDebugResources-31 /home/microwavedthebaby/Applications/Volume Control/Volume-Control/app/build/intermediates/incremental/debug/packageDebugResources/merged.dir
+com.volumecontrol.app-packageDebugResources-32 /home/microwavedthebaby/Applications/Volume Control/Volume-Control/app/build/intermediates/incremental/debug/packageDebugResources/stripped.dir
+com.volumecontrol.app-debug-33 /home/microwavedthebaby/Applications/Volume Control/Volume-Control/app/build/intermediates/merged_res/debug/mergeDebugResources
+com.volumecontrol.app-debug-34 /home/microwavedthebaby/Applications/Volume Control/Volume-Control/app/src/debug/res
+com.volumecontrol.app-main-35 /home/microwavedthebaby/Applications/Volume Control/Volume-Control/app/src/main/res

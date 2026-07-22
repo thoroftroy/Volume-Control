@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:gravity="center_vertical"
+    android:paddingHorizontal="8dp"
+    android:paddingVertical="4dp">
+
+    <TextView
+        android:id="@+id/btn_decrease"
+        android:layout_width="40dp"
+        android:layout_height="36dp"
+        android:gravity="center"
+        android:text="-"
+        android:textSize="22sp"
+        android:textStyle="bold"
+        android:clickable="true"
+        android:focusable="true"
+        android:background="?android:attr/selectableItemBackgroundBorderless"
+        android:textColor="@android:color/white" />
+
+    <TextView
+        android:id="@+id/tv_scale"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:gravity="center"
+        android:text="100%"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        android:textColor="@android:color/white" />
+
+    <TextView
+        android:id="@+id/btn_increase"
+        android:layout_width="40dp"
+        android:layout_height="36dp"
+        android:gravity="center"
+        android:text="+"
+        android:textSize="22sp"
+        android:textStyle="bold"
+        android:clickable="true"
+        android:focusable="true"
+        android:background="?android:attr/selectableItemBackgroundBorderless"
+        android:textColor="@android:color/white" />
+
+    <TextView
+        android:id="@+id/btn_reset"
+        android:layout_width="44dp"
+        android:layout_height="36dp"
+        android:gravity="center"
+        android:text="100"
+        android:textSize="12sp"
+        android:textStyle="bold"
+        android:clickable="true"
+        android:focusable="true"
+        android:background="?android:attr/selectableItemBackgroundBorderless"
+        android:textColor="?android:attr/colorAccent" />
+
+</LinearLayout>

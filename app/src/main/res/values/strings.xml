@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">Volume Control</string>
+    <string name="db_label">%d dB</string>
+    <string name="scale_status">Volume Scale: %d%%</string>
+</resources>

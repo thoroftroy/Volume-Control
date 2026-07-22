@@ -1,0 +1,37 @@
+R_DEF: Internal format may change without notice
+local
+color background
+color on_primary
+color on_primary_container
+color on_secondary
+color primary
+color primary_container
+color secondary
+color surface
+id btn_constant_tone
+id btn_decrease
+id btn_increase
+id btn_notification_settings
+id btn_reset
+id btn_retry
+id btn_sweep_tone
+id layout_controls
+id layout_permissions
+id seek_max_db
+id seek_min_db
+id switch_service
+id tv_constant_desc
+id tv_max_db
+id tv_min_db
+id tv_scale
+id tv_scale_status
+id tv_sweep_desc
+layout activity_main
+layout widget_notification
+mipmap ic_launcher
+mipmap ic_launcher_round
+string app_name
+string db_label
+string scale_status
+style Theme.VolumeControl
+xml accessibility_service_config
