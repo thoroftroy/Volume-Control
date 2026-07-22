@@ -1,5 +1,6 @@
 package com.volumecontrol
 
+import android.content.res.ColorStateList
 import android.media.AudioAttributes
 import android.media.AudioFormat
 import android.media.AudioTrack
@@ -13,15 +14,16 @@ class TestTonePlayer {
         const val FREQUENCY = 440.0
         const val SWEEP_DURATION_S = 10
         const val CONSTANT_AMPLITUDE = 0.2f
+        val ACTIVE_TINT = ColorStateList.valueOf(0xFF44CC44.toInt())
     }
 
     private var audioTrack: AudioTrack? = null
-    @Volatile private var constantPlaying = false
+    @Volatile private var tonePlaying = false
     private var toneThread: Thread? = null
 
     fun playConstantTone() {
         stop()
-        constantPlaying = true
+        tonePlaying = true
 
         val minBuf = AudioTrack.getMinBufferSize(
             SAMPLE_RATE, AudioFormat.CHANNEL_OUT_MONO, AudioFormat.ENCODING_PCM_16BIT
@@ -54,7 +56,7 @@ class TestTonePlayer {
             val phaseInc = 2.0 * PI * FREQUENCY / SAMPLE_RATE
             val amp = (CONSTANT_AMPLITUDE * Short.MAX_VALUE).toInt()
 
-            while (constantPlaying && audioTrack != null) {
+            while (tonePlaying && audioTrack != null) {
                 for (i in samples.indices) {
                     samples[i] = (amp * sin(phase)).toInt().toShort()
                     phase += phaseInc
@@ -70,6 +72,7 @@ class TestTonePlayer {
 
     fun playSweepTone() {
         stop()
+        tonePlaying = true
 
         val totalSamples = SAMPLE_RATE * SWEEP_DURATION_S
         val bufSize = totalSamples * 2
@@ -109,20 +112,12 @@ class TestTonePlayer {
         }
 
         audioTrack?.write(buffer, 0, buffer.size)
+        audioTrack?.setLoopPoints(0, totalSamples, -1)
         audioTrack?.play()
-
-        Thread {
-            Thread.sleep((SWEEP_DURATION_S * 1000).toLong() + 300)
-            constantPlaying = false
-            audioTrack?.let {
-                try { it.stop(); it.release() } catch (_: Exception) {}
-            }
-            audioTrack = null
-        }.start()
     }
 
     fun stop() {
-        constantPlaying = false
+        tonePlaying = false
         toneThread?.interrupt()
         toneThread = null
         audioTrack?.let {
@@ -131,5 +126,7 @@ class TestTonePlayer {
         audioTrack = null
     }
 
-    fun isPlayingConstant(): Boolean = constantPlaying
+    fun isPlaying(): Boolean = tonePlaying
+
+    fun getAudioSessionId(): Int = audioTrack?.audioSessionId ?: 0
 }

@@ -3376,6 +3376,7 @@ id search_src_text
 id search_voice_btn
 id seek_max_db
 id seek_min_db
+id seek_volume_scale
 id select_dialog_listview
 id selected
 id selection_type
@@ -3461,12 +3462,11 @@ id transition_position
 id transition_scene_layoutid_cache
 id transition_transform
 id triangle
-id tv_constant_desc
+id tv_avg_db
 id tv_max_db
 id tv_min_db
 id tv_scale
 id tv_scale_status
-id tv_sweep_desc
 id unchecked
 id uniform
 id unlabeled
@@ -3479,6 +3479,7 @@ id view_tree_saved_state_registry_owner
 id view_tree_view_model_store_owner
 id visible
 id visible_removing_fragment_view_tag
+id visualizer
 id withText
 id with_icon
 id withinBounds
@@ -3712,6 +3713,7 @@ string abc_toolbar_collapse_description
 string androidx_startup
 string app_name
 string appbar_scrolling_view_behavior
+string avg_label
 string bottom_sheet_behavior
 string bottomsheet_action_collapse
 string bottomsheet_action_expand

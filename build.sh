@@ -84,16 +84,18 @@ echo "Building debug APK..."
 APK="app/build/outputs/apk/debug/app-debug.apk"
 
 if [ -f "$APK" ]; then
+    VERSION=$(grep 'versionName' app/build.gradle.kts | grep -oP '"[^"]+"' | tr -d '"')
+    OUTPUT_APK="VolumeControl-v${VERSION}.apk"
     mkdir -p "$SCRIPT_DIR/Output"
-    cp "$APK" "$SCRIPT_DIR/Output/VolumeControl.apk"
+    cp "$APK" "$SCRIPT_DIR/Output/$OUTPUT_APK"
 
     echo ""
     echo "============================================"
     echo "  APK built successfully!"
-    echo "  $SCRIPT_DIR/Output/VolumeControl.apk"
+    echo "  $SCRIPT_DIR/Output/$OUTPUT_APK"
     echo "============================================"
 
-    APK_SIZE=$(du -h "$SCRIPT_DIR/Output/VolumeControl.apk" | cut -f1)
+    APK_SIZE=$(du -h "$SCRIPT_DIR/Output/$OUTPUT_APK" | cut -f1)
     echo "  Size: $APK_SIZE"
 else
     echo ""

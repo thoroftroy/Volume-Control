@@ -32,6 +32,11 @@ class VolumeScaler(private val context: Context) {
         save()
     }
 
+    fun setScale(scale: Int) {
+        currentScale = scale.coerceIn(SCALE_MIN, SCALE_MAX)
+        save()
+    }
+
     fun loadScale() {
         val prefs = context.getSharedPreferences("volume_control", Context.MODE_PRIVATE)
         currentScale = prefs.getInt("volume_scale", SCALE_DEFAULT)

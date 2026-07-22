@@ -57,6 +57,12 @@ class AudioProcessingService : Service() {
                 equalizerEngine.updateScaleFactor(volumeScaler.getScaleFactor())
                 updateNotification()
             }
+            "SET_SCALE" -> {
+                val scale = intent.getIntExtra("scale", 100)
+                volumeScaler.setScale(scale)
+                equalizerEngine.updateScaleFactor(volumeScaler.getScaleFactor())
+                updateNotification()
+            }
             null -> {
                 val prefs = getSharedPreferences("volume_control", MODE_PRIVATE)
                 if (prefs.getBoolean("service_enabled", false)) {

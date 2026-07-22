@@ -43,12 +43,22 @@ class EqualizerEngine {
     private fun applySettings() {
         val dp = dynamics ?: return
         try {
-            val inputGain = (-minDb).toFloat().coerceIn(0f, 40f)
+            val avgDb = (minDb + maxDb) / 2f
+            val rangeWidth = (maxDb - minDb).toFloat()
+
+            val inputGain = ((-avgDb) * 0.6f).coerceIn(5f, 30f)
+
             val compressorThreshold = maxDb.toFloat()
+            val compressorRatio = 3f
+            val compressorKnee = (rangeWidth * 0.35f).coerceIn(4f, 16f)
+
             val scaleGainDb = (20.0 * log10(scaleFactor.toDouble().coerceAtLeast(0.001))).toFloat()
 
             val mbcBand = DynamicsProcessing.MbcBand(
-                true, 1000f, 5f, 80f, 10f, compressorThreshold, 6f, -90f, 1f, 0f, 0f
+                true, 1000f,
+                5f, 80f,
+                compressorRatio, compressorThreshold, compressorKnee,
+                -90f, 1f, 0f, 0f
             )
 
             val mbc = DynamicsProcessing.Mbc(true, true, 1)
