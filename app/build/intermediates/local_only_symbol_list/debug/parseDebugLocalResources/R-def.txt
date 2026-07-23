@@ -22,6 +22,11 @@ id seek_max_db
 id seek_min_db
 id seek_volume_scale
 id switch_service
+id switch_stream_alarm
+id switch_stream_music
+id switch_stream_notif
+id switch_stream_ring
+id switch_stream_voice
 id tv_avg_db
 id tv_max_db
 id tv_min_db

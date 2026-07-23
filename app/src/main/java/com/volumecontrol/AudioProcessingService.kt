@@ -27,14 +27,6 @@ class AudioProcessingService : Service() {
     private lateinit var volumeScaler: VolumeScaler
     private val handler = Handler(Looper.getMainLooper())
     private var currentMinDb = -40
-    private val volumeStreams = intArrayOf(
-        AudioManager.STREAM_MUSIC,
-        AudioManager.STREAM_VOICE_CALL,
-        AudioManager.STREAM_RING,
-        AudioManager.STREAM_ALARM,
-        AudioManager.STREAM_NOTIFICATION,
-        AudioManager.STREAM_SYSTEM
-    )
 
     override fun onCreate() {
         super.onCreate()
@@ -73,12 +65,22 @@ class AudioProcessingService : Service() {
     }
 
     private fun pushSystemVolume() {
+        val prefs = getSharedPreferences("volume_control", MODE_PRIVATE)
         val minFraction = (96 + currentMinDb).toFloat() / 96f
         val baseVol = (0.2f + minFraction * 0.8f).coerceIn(0.1f, 1f)
         val scale = volumeScaler.getScaleFactor()
         val finalFactor = (baseVol * scale.coerceAtMost(1f)).coerceIn(0.1f, 1f)
 
-        for (stream in volumeStreams) {
+        val streamKeys = mapOf(
+            AudioManager.STREAM_MUSIC to "stream_music",
+            AudioManager.STREAM_VOICE_CALL to "stream_voice",
+            AudioManager.STREAM_RING to "stream_ring",
+            AudioManager.STREAM_NOTIFICATION to "stream_notif",
+            AudioManager.STREAM_ALARM to "stream_alarm"
+        )
+
+        for ((stream, key) in streamKeys) {
+            if (!prefs.getBoolean(key, stream == AudioManager.STREAM_MUSIC || stream == AudioManager.STREAM_VOICE_CALL)) continue
             try {
                 val max = audioManager.getStreamMaxVolume(stream)
                 val target = (max * finalFactor).toInt().coerceIn(1, max)

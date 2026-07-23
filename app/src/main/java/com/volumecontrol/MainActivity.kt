@@ -32,6 +32,11 @@ class MainActivity : AppCompatActivity() {
     private lateinit var btnSweepTone: Button
     private lateinit var visualizerView: VisualizerView
     private lateinit var btnResetDefaults: Button
+    private lateinit var switchStreamMusic: SwitchCompat
+    private lateinit var switchStreamVoice: SwitchCompat
+    private lateinit var switchStreamRing: SwitchCompat
+    private lateinit var switchStreamNotif: SwitchCompat
+    private lateinit var switchStreamAlarm: SwitchCompat
 
     private val testTonePlayer = TestTonePlayer()
     private val handler = android.os.Handler(android.os.Looper.getMainLooper())
@@ -60,6 +65,11 @@ class MainActivity : AppCompatActivity() {
         btnSweepTone = findViewById(R.id.btn_sweep_tone)
         visualizerView = findViewById(R.id.visualizer)
         btnResetDefaults = findViewById(R.id.btn_reset_defaults)
+        switchStreamMusic = findViewById(R.id.switch_stream_music)
+        switchStreamVoice = findViewById(R.id.switch_stream_voice)
+        switchStreamRing = findViewById(R.id.switch_stream_ring)
+        switchStreamNotif = findViewById(R.id.switch_stream_notif)
+        switchStreamAlarm = findViewById(R.id.switch_stream_alarm)
 
         testTonePlayer.onWaveform = { data -> visualizerView.pushWaveform(data) }
 
@@ -141,6 +151,15 @@ class MainActivity : AppCompatActivity() {
         }
 
         btnResetDefaults.setOnClickListener { resetToDefaults() }
+
+        val streamListener = { _: Any?, _: Boolean ->
+            saveStreamPrefs()
+        }
+        switchStreamMusic.setOnCheckedChangeListener(streamListener)
+        switchStreamVoice.setOnCheckedChangeListener(streamListener)
+        switchStreamRing.setOnCheckedChangeListener(streamListener)
+        switchStreamNotif.setOnCheckedChangeListener(streamListener)
+        switchStreamAlarm.setOnCheckedChangeListener(streamListener)
     }
 
     private fun resetToneButtons() {
@@ -198,6 +217,25 @@ class MainActivity : AppCompatActivity() {
         loadSettings()
     }
 
+    private fun saveStreamPrefs() {
+        getSharedPreferences("volume_control", MODE_PRIVATE).edit()
+            .putBoolean("stream_music", switchStreamMusic.isChecked)
+            .putBoolean("stream_voice", switchStreamVoice.isChecked)
+            .putBoolean("stream_ring", switchStreamRing.isChecked)
+            .putBoolean("stream_notif", switchStreamNotif.isChecked)
+            .putBoolean("stream_alarm", switchStreamAlarm.isChecked)
+            .apply()
+    }
+
+    private fun loadStreamPrefs() {
+        val prefs = getSharedPreferences("volume_control", MODE_PRIVATE)
+        switchStreamMusic.isChecked = prefs.getBoolean("stream_music", true)
+        switchStreamVoice.isChecked = prefs.getBoolean("stream_voice", true)
+        switchStreamRing.isChecked = prefs.getBoolean("stream_ring", false)
+        switchStreamNotif.isChecked = prefs.getBoolean("stream_notif", false)
+        switchStreamAlarm.isChecked = prefs.getBoolean("stream_alarm", false)
+    }
+
     private fun loadSettings() {
         val prefs = getSharedPreferences("volume_control", MODE_PRIVATE)
         seekMinDb.progress = dbToProgress(prefs.getInt("min_db", -40))
@@ -210,6 +248,7 @@ class MainActivity : AppCompatActivity() {
         tvScaleStatus.text = getString(R.string.scale_status, scale)
         switchService.isChecked = AudioProcessingService.isRunning
         updateVisualizerRange()
+        loadStreamPrefs()
     }
 
     private fun loadScaleDisplay() {
