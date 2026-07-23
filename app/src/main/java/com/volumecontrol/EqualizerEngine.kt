@@ -1,24 +1,34 @@
 package com.volumecontrol
 
-import android.media.audiofx.DynamicsProcessing
+import android.media.audiofx.Equalizer
+import android.media.audiofx.LoudnessEnhancer
 import android.util.Log
 import kotlin.math.log10
 
 class EqualizerEngine {
 
-    private var dynamics: DynamicsProcessing? = null
+    private var equalizer: Equalizer? = null
+    private var loudness: LoudnessEnhancer? = null
     private var minDb = -40
     private var maxDb = -10
     private var scaleFactor = 1.0f
+    private var bandCount = 0
+    private var levelRange: ShortArray? = null
 
     fun attachGlobal() {
         try {
             releaseAll()
-            dynamics = DynamicsProcessing(0)
-            dynamics?.enabled = true
+            equalizer = Equalizer(0, 0).apply {
+                enabled = true
+                bandCount = numberOfBands.toInt()
+                levelRange = bandLevelRange
+            }
+            loudness = LoudnessEnhancer(0).apply { enabled = true }
             applySettings()
         } catch (e: Exception) {
-            Log.e("EqualizerEngine", "Failed to create global dynamics", e)
+            Log.e("EqualizerEngine", "Failed to create global effects", e)
+            equalizer = null
+            loudness = null
         }
     }
 
@@ -34,46 +44,36 @@ class EqualizerEngine {
     }
 
     fun releaseAll() {
-        dynamics?.let {
-            try { it.release() } catch (_: Exception) {}
-        }
-        dynamics = null
+        equalizer?.let { try { it.release() } catch (_: Exception) {} }
+        loudness?.let { try { it.release() } catch (_: Exception) {} }
+        equalizer = null
+        loudness = null
     }
 
     private fun applySettings() {
-        val dp = dynamics ?: return
         try {
-            val rangeWidth = (maxDb - minDb).coerceAtLeast(1).toFloat()
-            val tightness = (30f / rangeWidth).coerceIn(0.15f, 1f)
+            val eq = equalizer ?: return
+            val range = levelRange ?: return
+            val minLevel = range[0].toInt()
+            val maxLevel = range[1].toInt()
 
-            val inputGain = ((-minDb).toFloat() * tightness * 0.4f).coerceIn(2f, 18f)
-            val compThreshold = maxDb.toFloat()
-            val compRatio = (2f + tightness * 4f).coerceIn(2f, 6f)
-            val compKnee = (rangeWidth * 0.2f).coerceIn(4f, 12f)
+            val loudFraction = (96 + minDb).toFloat() / 96f
+            val baseBoostDb = loudFraction * 16f
 
-            val scaleGainDb = (20.0 * log10(scaleFactor.toDouble().coerceAtLeast(0.001))).toFloat()
+            val scaleDb = if (scaleFactor > 1f) {
+                (20.0 * log10(scaleFactor.toDouble())).toFloat()
+            } else 0f
 
-            val mbcBand = DynamicsProcessing.MbcBand(
-                true, 1000f,
-                12f, 100f,
-                compRatio, compThreshold, compKnee,
-                -90f, 1f,
-                0f, 0f
-            )
+            val totalBoostMb = ((baseBoostDb + scaleDb) * 100f).toInt().coerceIn(minLevel, maxLevel)
 
-            val mbc = DynamicsProcessing.Mbc(true, true, 1)
-            mbc.setBand(0, mbcBand)
+            for (i in 0 until bandCount) {
+                eq.setBandLevel(i.toShort(), totalBoostMb.toShort())
+            }
 
-            val limiter = DynamicsProcessing.Limiter(
-                true, true, 0, 1f, 60f, 20f, -1f, scaleGainDb
-            )
-
-            dp.setInputGainAllChannelsTo(inputGain)
-            dp.setMbcAllChannelsTo(mbc)
-            dp.setMbcBandAllChannelsTo(0, mbcBand)
-            dp.setLimiterAllChannelsTo(limiter)
+            val loudGain = (maxOf(0f, (scaleFactor - 1f)) * 5000f).toInt().coerceIn(0, 15000)
+            loudness?.setTargetGain(loudGain)
         } catch (e: Exception) {
-            Log.e("EqualizerEngine", "Failed to apply dynamics settings", e)
+            Log.e("EqualizerEngine", "Failed to apply settings", e)
         }
     }
 }

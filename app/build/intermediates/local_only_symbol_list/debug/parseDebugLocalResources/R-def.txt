@@ -13,6 +13,7 @@ id btn_decrease
 id btn_increase
 id btn_notification_settings
 id btn_reset
+id btn_reset_defaults
 id btn_retry
 id btn_sweep_tone
 id layout_controls

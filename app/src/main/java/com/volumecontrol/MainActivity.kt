@@ -2,7 +2,6 @@ package com.volumecontrol
 
 import android.Manifest
 import android.content.Intent
-import android.media.audiofx.Visualizer
 import android.os.Build
 import android.os.Bundle
 import android.view.View
@@ -32,11 +31,10 @@ class MainActivity : AppCompatActivity() {
     private lateinit var btnConstantTone: Button
     private lateinit var btnSweepTone: Button
     private lateinit var visualizerView: VisualizerView
+    private lateinit var btnResetDefaults: Button
 
     private val testTonePlayer = TestTonePlayer()
-    private var viz: Visualizer? = null
-    private val vizHandler = android.os.Handler(android.os.Looper.getMainLooper())
-    private var vizPoll: Runnable? = null
+    private val handler = android.os.Handler(android.os.Looper.getMainLooper())
 
     private val notificationPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
@@ -61,6 +59,9 @@ class MainActivity : AppCompatActivity() {
         btnConstantTone = findViewById(R.id.btn_constant_tone)
         btnSweepTone = findViewById(R.id.btn_sweep_tone)
         visualizerView = findViewById(R.id.visualizer)
+        btnResetDefaults = findViewById(R.id.btn_reset_defaults)
+
+        testTonePlayer.onWaveform = { data -> visualizerView.pushWaveform(data) }
 
         setupListeners()
     }
@@ -70,17 +71,10 @@ class MainActivity : AppCompatActivity() {
         checkPermissions()
         loadScaleDisplay()
         updateVisualizerRange()
-        startVizPoll()
-    }
-
-    override fun onPause() {
-        super.onPause()
-        stopVizPoll()
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        releaseVisualizer()
         testTonePlayer.stop()
     }
 
@@ -92,8 +86,7 @@ class MainActivity : AppCompatActivity() {
 
         seekMinDb.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(s: SeekBar, progress: Int, fromUser: Boolean) {
-                val db = progress - 96
-                tvMinDb.text = getString(R.string.db_label, db)
+                tvMinDb.text = getString(R.string.db_label, progress - 96)
                 if (progress > seekMaxDb.progress) seekMaxDb.progress = progress
                 updateAvgDisplay()
                 updateVisualizerRange()
@@ -104,8 +97,7 @@ class MainActivity : AppCompatActivity() {
 
         seekMaxDb.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(s: SeekBar, progress: Int, fromUser: Boolean) {
-                val db = progress - 96
-                tvMaxDb.text = getString(R.string.db_label, db)
+                tvMaxDb.text = getString(R.string.db_label, progress - 96)
                 if (progress < seekMinDb.progress) seekMinDb.progress = progress
                 updateAvgDisplay()
                 updateVisualizerRange()
@@ -115,62 +107,53 @@ class MainActivity : AppCompatActivity() {
         })
 
         switchService.setOnCheckedChangeListener { _, isChecked ->
-            if (!checkPermissionsForService()) {
-                switchService.isChecked = false
-                return@setOnCheckedChangeListener
-            }
+            if (!checkPermissionsForService()) { switchService.isChecked = false; return@setOnCheckedChangeListener }
             if (isChecked) startService() else stopService()
         }
 
         seekVolumeScale.max = 450
         seekVolumeScale.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
-            override fun onProgressChanged(s: SeekBar, progress: Int, fromUser: Boolean) {
-                tvScaleStatus.text = getString(R.string.scale_status, progress + 50)
+            override fun onProgressChanged(s: SeekBar, p: Int, fromUser: Boolean) {
+                tvScaleStatus.text = getString(R.string.scale_status, p + 50)
             }
             override fun onStartTrackingTouch(s: SeekBar) {}
             override fun onStopTrackingTouch(s: SeekBar) { sendScaleUpdate(s.progress + 50) }
         })
 
         btnConstantTone.setOnClickListener {
-            if (testTonePlayer.isPlaying()) {
-                testTonePlayer.stop(); resetToneButtons(); releaseVisualizer()
-            } else {
+            if (testTonePlayer.isPlaying()) { testTonePlayer.stop(); resetToneButtons() }
+            else {
                 testTonePlayer.playConstantTone()
                 btnConstantTone.text = "Stop Tone"
                 btnConstantTone.backgroundTintList = TestTonePlayer.ACTIVE_TINT
-                btnSweepTone.text = "Sweep Test"
-                btnSweepTone.backgroundTintList = null
-                startVizForTestTone()
+                btnSweepTone.text = "Sweep Test"; btnSweepTone.backgroundTintList = null
             }
         }
 
         btnSweepTone.setOnClickListener {
-            if (testTonePlayer.isPlaying()) {
-                testTonePlayer.stop(); resetToneButtons(); releaseVisualizer()
-            } else {
+            if (testTonePlayer.isPlaying()) { testTonePlayer.stop(); resetToneButtons() }
+            else {
                 testTonePlayer.playSweepTone()
                 btnSweepTone.text = "Stop Sweep"
                 btnSweepTone.backgroundTintList = TestTonePlayer.ACTIVE_TINT
-                btnConstantTone.text = "Constant Tone"
-                btnConstantTone.backgroundTintList = null
-                startVizForTestTone()
+                btnConstantTone.text = "Constant Tone"; btnConstantTone.backgroundTintList = null
             }
         }
+
+        btnResetDefaults.setOnClickListener { resetToDefaults() }
     }
 
     private fun resetToneButtons() {
-        btnConstantTone.text = "Constant Tone"
-        btnConstantTone.backgroundTintList = null
-        btnSweepTone.text = "Sweep Test"
-        btnSweepTone.backgroundTintList = null
+        btnConstantTone.text = "Constant Tone"; btnConstantTone.backgroundTintList = null
+        btnSweepTone.text = "Sweep Test"; btnSweepTone.backgroundTintList = null
     }
 
-    private fun progressToDb(progress: Int) = progress - 96
+    private fun progressToDb(p: Int) = p - 96
     private fun dbToProgress(db: Int) = (db + 96).coerceIn(0, 96)
 
     private fun updateAvgDisplay() {
-        val avgDb = (progressToDb(seekMinDb.progress) + progressToDb(seekMaxDb.progress)) / 2
-        tvAvgDb.text = getString(R.string.avg_label, avgDb)
+        val avg = (progressToDb(seekMinDb.progress) + progressToDb(seekMaxDb.progress)) / 2
+        tvAvgDb.text = getString(R.string.avg_label, avg)
     }
 
     private fun updateVisualizerRange() {
@@ -179,40 +162,6 @@ class MainActivity : AppCompatActivity() {
             progressToDb(seekMaxDb.progress).toFloat()
         )
     }
-
-    private fun startVizForTestTone() {
-        releaseVisualizer()
-        val sid = testTonePlayer.getAudioSessionId()
-        if (sid <= 0) { vizHandler.postDelayed({ startVizForTestTone() }, 150); return }
-        try {
-            viz = Visualizer(sid).apply {
-                setCaptureSize(Visualizer.getCaptureSizeRange()[1])
-                setDataCaptureListener(object : Visualizer.OnDataCaptureListener {
-                    override fun onWaveFormDataCapture(v: Visualizer, waveform: ByteArray, sr: Int) {
-                        visualizerView.pushWaveform(waveform)
-                    }
-                    override fun onFftDataCapture(v: Visualizer, fft: ByteArray, sr: Int) {}
-                }, Visualizer.getMaxCaptureRate() / 2, true, false)
-                enabled = true
-            }
-        } catch (_: Exception) { viz = null }
-    }
-
-    private fun startVizPoll() {
-        stopVizPoll()
-        vizPoll = object : Runnable {
-            override fun run() {
-                val sid = testTonePlayer.getAudioSessionId()
-                if (sid > 0 && viz == null) startVizForTestTone()
-                if (sid <= 0 && viz != null) releaseVisualizer()
-                vizHandler.postDelayed(this, 1500)
-            }
-        }
-        vizHandler.post(vizPoll!!)
-    }
-
-    private fun stopVizPoll() { vizPoll?.let { vizHandler.removeCallbacks(it) }; vizPoll = null }
-    private fun releaseVisualizer() { viz?.let { try { it.enabled = false; it.release() } catch (_: Exception) {} }; viz = null }
 
     private fun checkPermissions(): Boolean {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
@@ -240,14 +189,12 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun showPermissionScreen() {
-        layoutPermissions.visibility = View.VISIBLE
-        layoutControls.visibility = View.GONE
+        layoutPermissions.visibility = View.VISIBLE; layoutControls.visibility = View.GONE
         switchService.isChecked = false
     }
 
     private fun showControlsScreen() {
-        layoutPermissions.visibility = View.GONE
-        layoutControls.visibility = View.VISIBLE
+        layoutPermissions.visibility = View.GONE; layoutControls.visibility = View.VISIBLE
         loadSettings()
     }
 
@@ -272,15 +219,28 @@ class MainActivity : AppCompatActivity() {
         seekVolumeScale.progress = scale - 50
     }
 
+    private fun resetToDefaults() {
+        seekMinDb.progress = dbToProgress(-40)
+        seekMaxDb.progress = dbToProgress(-10)
+        tvMinDb.text = getString(R.string.db_label, -40)
+        tvMaxDb.text = getString(R.string.db_label, -10)
+        updateAvgDisplay()
+        updateVisualizerRange()
+
+        seekVolumeScale.progress = 50
+        tvScaleStatus.text = getString(R.string.scale_status, 100)
+
+        sendEqualizerUpdate()
+        sendScaleUpdate(100)
+    }
+
     private fun sendEqualizerUpdate() {
         val minDb = progressToDb(seekMinDb.progress)
         val maxDb = progressToDb(seekMaxDb.progress)
         getSharedPreferences("volume_control", MODE_PRIVATE).edit()
             .putInt("min_db", minDb).putInt("max_db", maxDb).apply()
         startService(Intent(this, AudioProcessingService::class.java).apply {
-            action = "UPDATE_EQUALIZER"
-            putExtra("min_db", minDb)
-            putExtra("max_db", maxDb)
+            action = "UPDATE_EQUALIZER"; putExtra("min_db", minDb); putExtra("max_db", maxDb)
         })
     }
 
@@ -288,14 +248,13 @@ class MainActivity : AppCompatActivity() {
         getSharedPreferences("volume_control", MODE_PRIVATE).edit()
             .putInt("volume_scale", scale).apply()
         startService(Intent(this, AudioProcessingService::class.java).apply {
-            action = "SET_SCALE"
-            putExtra("scale", scale)
+            action = "SET_SCALE"; putExtra("scale", scale)
         })
     }
 
     private fun startService() {
-        val intent = Intent(this, AudioProcessingService::class.java).apply { action = "START" }
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) startForegroundService(intent) else startService(intent)
+        val i = Intent(this, AudioProcessingService::class.java).apply { action = "START" }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) startForegroundService(i) else startService(i)
     }
 
     private fun stopService() {

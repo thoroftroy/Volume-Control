@@ -151,7 +151,7 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Audio is pushed toward the average of your range. Peaks can reach the max and quiet parts can drop to the min, so it stays dynamic but consistent."
+                android:text="Slide right to make everything louder. Min sets the baseline volume floor, max limits peaks. Both affect all audio system-wide."
                 android:textSize="13sp"
                 android:layout_marginBottom="16dp"
                 android:alpha="0.7" />
@@ -227,6 +227,15 @@
                 android:gravity="center"
                 android:layout_marginBottom="24dp"
                 android:alpha="0.6" />
+
+            <Button
+                android:id="@+id/btn_reset_defaults"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Reset to Defaults"
+                android:layout_gravity="center"
+                android:layout_marginBottom="20dp"
+                style="@style/Widget.Material3.Button.TonalButton" />
 
             <View
                 android:layout_width="match_parent"
