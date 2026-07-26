@@ -111,6 +111,18 @@
                 android:layout_marginBottom="24dp">
 
                 <TextView
+                    android:id="@+id/btn_scale_down"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:text="-"
+                    android:textSize="20sp"
+                    android:textStyle="bold"
+                    android:gravity="center"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:background="?android:attr/selectableItemBackgroundBorderless" />
+
+                <TextView
                     android:layout_width="48dp"
                     android:layout_height="wrap_content"
                     android:text="50%"
@@ -131,6 +143,18 @@
                     android:text="500%"
                     android:textSize="12sp"
                     android:gravity="center" />
+
+                <TextView
+                    android:id="@+id/btn_scale_up"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:text="+"
+                    android:textSize="20sp"
+                    android:textStyle="bold"
+                    android:gravity="center"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:background="?android:attr/selectableItemBackgroundBorderless" />
 
             </LinearLayout>
 
@@ -196,13 +220,33 @@
                 android:background="?android:attr/listDivider"
                 android:layout_marginBottom="16dp" />
 
-            <TextView
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Equalizer"
-                android:textSize="20sp"
-                android:textStyle="bold"
-                android:layout_marginBottom="8dp" />
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:paddingVertical="8dp"
+                android:layout_marginBottom="8dp">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Equalizer"
+                    android:textSize="20sp"
+                    android:textStyle="bold" />
+
+                <Button
+                    android:id="@+id/btn_reset_defaults"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Reset"
+                    style="@style/Widget.Material3.Button.TonalButton"
+                    android:minHeight="0dp"
+                    android:paddingVertical="4dp"
+                    android:paddingHorizontal="12dp" />
+
+            </LinearLayout>
 
             <TextView
                 android:layout_width="match_parent"
@@ -283,15 +327,6 @@
                 android:gravity="center"
                 android:layout_marginBottom="24dp"
                 android:alpha="0.6" />
-
-            <Button
-                android:id="@+id/btn_reset_defaults"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Reset to Defaults"
-                android:layout_gravity="center"
-                android:layout_marginBottom="20dp"
-                style="@style/Widget.Material3.Button.TonalButton" />
 
             <View
                 android:layout_width="match_parent"

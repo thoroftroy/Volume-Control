@@ -7,9 +7,7 @@ import android.app.Service
 import android.content.Context
 import android.content.Intent
 import android.media.AudioManager
-import android.os.Handler
 import android.os.IBinder
-import android.os.Looper
 import android.widget.RemoteViews
 import androidx.core.app.NotificationCompat
 
@@ -22,10 +20,9 @@ class AudioProcessingService : Service() {
             private set
     }
 
-    private lateinit var audioManager: AudioManager
     private lateinit var equalizerEngine: EqualizerEngine
     private lateinit var volumeScaler: VolumeScaler
-    private val handler = Handler(Looper.getMainLooper())
+    private lateinit var audioManager: AudioManager
     private var currentMinDb = -40
 
     override fun onCreate() {
@@ -40,10 +37,10 @@ class AudioProcessingService : Service() {
         when (intent?.action) {
             "START" -> startProcessing()
             "STOP" -> stopProcessing()
+            "UPDATE_STREAMS" -> pushSystemVolume()
             "UPDATE_EQUALIZER" -> {
                 currentMinDb = intent.getIntExtra("min_db", -40)
                 equalizerEngine.updateRange(currentMinDb, intent.getIntExtra("max_db", -10))
-                pushSystemVolume()
             }
             "SCALE_UP" -> { volumeScaler.increase(); applyScale() }
             "SCALE_DOWN" -> { volumeScaler.decrease(); applyScale() }
@@ -61,15 +58,11 @@ class AudioProcessingService : Service() {
     private fun applyScale() {
         equalizerEngine.updateScaleFactor(volumeScaler.getScaleFactor())
         updateNotification()
-        pushSystemVolume()
     }
 
     private fun pushSystemVolume() {
         val prefs = getSharedPreferences("volume_control", MODE_PRIVATE)
-        val minFraction = (96 + currentMinDb).toFloat() / 96f
-        val baseVol = (0.2f + minFraction * 0.8f).coerceIn(0.1f, 1f)
-        val scale = volumeScaler.getScaleFactor()
-        val finalFactor = (baseVol * scale.coerceAtMost(1f)).coerceIn(0.1f, 1f)
+        val minFraction = (96 + currentMinDb).toFloat().coerceIn(0f, 96f) / 96f
 
         val streamKeys = mapOf(
             AudioManager.STREAM_MUSIC to "stream_music",
@@ -83,7 +76,8 @@ class AudioProcessingService : Service() {
             if (!prefs.getBoolean(key, stream == AudioManager.STREAM_MUSIC || stream == AudioManager.STREAM_VOICE_CALL)) continue
             try {
                 val max = audioManager.getStreamMaxVolume(stream)
-                val target = (max * finalFactor).toInt().coerceIn(1, max)
+                val baseVol = (0.3f + minFraction * 0.7f).coerceIn(0.15f, 1f)
+                val target = (max * baseVol).toInt().coerceIn(1, max)
                 audioManager.setStreamVolume(stream, target, 0)
             } catch (_: Exception) {}
         }
@@ -101,6 +95,7 @@ class AudioProcessingService : Service() {
         currentMinDb = prefs.getInt("min_db", -40)
         equalizerEngine.updateRange(currentMinDb, prefs.getInt("max_db", -10))
         applyScale()
+        pushSystemVolume()
     }
 
     private fun stopProcessing() {
@@ -126,12 +121,15 @@ class AudioProcessingService : Service() {
         val contentIntent = PendingIntent.getActivity(this, 0, Intent(this, MainActivity::class.java),
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
 
+        val stopIntent = PendingIntent.getService(this, 4, intent("STOP"), flags)
+
         return NotificationCompat.Builder(this, CHANNEL_ID)
             .setSmallIcon(android.R.drawable.ic_media_play)
             .setContentTitle("Volume Control Active")
             .setContentText("Volume scale: ${scalePercent}%")
             .setOngoing(true).setPriority(NotificationCompat.PRIORITY_LOW)
             .setContentIntent(contentIntent)
+            .setDeleteIntent(stopIntent)
             .setCustomContentView(remoteViews)
             .setStyle(NotificationCompat.DecoratedCustomViewStyle())
             .build()

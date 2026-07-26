@@ -3108,6 +3108,8 @@ id btn_notification_settings
 id btn_reset
 id btn_reset_defaults
 id btn_retry
+id btn_scale_down
+id btn_scale_up
 id btn_sweep_tone
 id buttonPanel
 id cancel_button
